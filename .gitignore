@@ -1,0 +1,38 @@
+# Android heap dumps
+*.hprof
+
+# Android build files
+build/
+.gradle/
+local.properties
+
+# Android Studio files
+.idea/
+*.iml
+*.hprof
+*.log
+
+# Mac files
+.DS_Store
+
+# Gradle files
+/gradle
+gradle.properties
+/gradlew
+/gradlew.bat
+!gradle/wrapper/gradle-wrapper.jar
+
+# Build directory
+/build
+
+# Keystore files
+*.jks
+
+# Log files
+*.log
+
+# Temp files
+*.tmp
+
+# Cache files
+*.cache 

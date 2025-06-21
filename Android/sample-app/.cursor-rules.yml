@@ -1,0 +1,471 @@
+project_type: android
+language: kotlin
+framework: jetpack_compose
+
+rules:
+
+  # =================== BUILD & TESTING REQUIREMENTS ===================
+
+  - match: "build"
+    action: "ALWAYS run unit tests before building. Tests must pass before any deployment or release."
+    enforce: true
+    insert: |
+      # Required sequence for any build:
+      ./gradlew :qrcode-sdk:testDebugUnitTest  # Run tests first
+      ./gradlew build                          # Only if tests pass
+      
+      # For CI/CD:
+      ./gradlew check                          # Runs tests + lint + all checks
+
+  - match: "fresh build"
+    action: "Kill all Java processes before running a fresh Gradle build to prevent conflicts, stale daemons, and ensure clean builds."
+    enforce: true
+    insert: |
+      # Clean build sequence (kill Java processes first):
+      pkill -f java || true                    # Kill all Java processes (ignore if none found)
+      pkill -f gradle || true                  # Kill any remaining Gradle daemons
+      ./gradlew --stop                         # Stop Gradle daemon gracefully
+      ./gradlew clean                          # Clean build artifacts
+      ./gradlew :qrcode-sdk:testDebugUnitTest  # Run tests
+      ./gradlew build                          # Fresh build
+      
+      # Alternative one-liner for quick clean builds:
+      # pkill -f java; ./gradlew clean build
+
+  - match: "Unit Tests"
+    action: "Write comprehensive unit tests for all core functionality. Focus on edge cases, error conditions, and regression testing. Use real-world data for validation."
+    enforce: true
+    insert: |
+      @Test
+      fun testRealWorldScenario() {
+          // Use actual production data
+          val realQR = "00020101021129230008ke.go.qr680722266655204541153034045802KE5919..."
+          val parsed = parser.parseKenyaP2PQR(realQR)
+          
+          // Validate all critical fields
+          assertEquals("Expected value", parsed.field)
+          assertTrue("Should handle edge case", condition)
+      }
+
+  - match: "Test Coverage"
+    action: "Maintain >90% test coverage for SDK modules. Every bug fix must include a regression test. Test both happy path and failure scenarios."
+    enforce: true
+    insert: |
+      // Test structure: Arrange, Act, Assert
+      @Test
+      fun testSpecificBugFix() {
+          // Arrange: Set up test data that reproduces the bug
+          val malformedQR = "problematic_data"
+          
+          // Act: Execute the code that should handle it
+          val result = parser.parseQR(malformedQR)
+          
+          // Assert: Verify the fix works
+          assertNotNull("Should handle malformed data gracefully", result)
+      }
+
+  - match: "Testing Strategy"
+    action: "Use Test-Driven Development for new features. Write failing tests first, implement code to pass tests, then refactor. Group tests by functionality."
+    insert: |
+      class QRCodeSDKTest {
+          // Group 1: Core functionality
+          @Test fun testRealWorldParsing()
+          @Test fun testCRC16Calculation()
+          
+          // Group 2: Error handling
+          @Test fun testInvalidCRCHandling()
+          @Test fun testBasicErrorHandling()
+          
+          // Group 3: Format support
+          @Test fun testP2MFormatVersionSupport()
+          @Test fun testLegacyCBKFormatParsing()
+      }
+
+  - match: "Gradle Issues"
+    action: "Handle Gradle daemon conflicts, OutOfMemoryError, and build failures by killing Java processes and restarting clean. Use this for stuck builds or memory issues."
+    insert: |
+      # When experiencing Gradle issues (stuck builds, OOM, etc.):
+      
+      # 1. Nuclear option - kill everything:
+      pkill -f java && pkill -f gradle
+      ./gradlew --stop
+      ./gradlew clean
+      
+      # 2. For memory issues specifically:
+      export GRADLE_OPTS="-Xmx4g -XX:MaxMetaspaceSize=512m"
+      ./gradlew clean build --no-daemon
+      
+      # 3. For persistent daemon issues:
+      rm -rf ~/.gradle/daemon/
+      ./gradlew clean build
+      
+      # 4. Check for competing processes:
+      ps aux | grep java | grep -v grep
+
+  # =================== ANDROID & COMPOSE GUIDELINES ===================
+
+  - match: "Scaffold"
+    action: "Always use a Scaffold as the root composable unless it's a modal/dialog screen."
+    insert: |
+      Scaffold(
+          topBar = { TopAppBar(title = { Text("Title") }) },
+          bottomBar = { BottomNavigation { /* nav items */ } },
+          floatingActionButton = { FloatingActionButton(onClick = {}) { Icon(Icons.Default.Add, null) } }
+      ) { paddingValues ->
+          // Main screen content
+          Column(modifier = Modifier.padding(paddingValues)) {
+              // your content here
+          }
+      }
+
+  - match: "ViewModel"
+    action: "Use HiltViewModel injection and rememberSaveable states where applicable."
+    insert: |
+      @HiltViewModel
+      class ExampleViewModel @Inject constructor(
+          private val repository: ExampleRepository
+      ) : ViewModel() {
+          private val _uiState = MutableStateFlow(ExampleUiState())
+          val uiState: StateFlow<ExampleUiState> = _uiState
+      }
+
+  - match: "TextField"
+    action: "Always include label, placeholder, and keyboard options."
+    insert: |
+      OutlinedTextField(
+          value = text,
+          onValueChange = { text = it },
+          label = { Text("Label") },
+          placeholder = { Text("Type here...") },
+          keyboardOptions = KeyboardOptions.Default,
+          modifier = Modifier.fillMaxWidth()
+      )
+
+  - match: "LazyColumn"
+    action: "Use LazyColumn with items for lists. Always provide key if possible."
+    insert: |
+      LazyColumn(
+          modifier = Modifier.fillMaxSize(),
+          contentPadding = PaddingValues(16.dp)
+      ) {
+          items(itemsList, key = { it.id }) { item ->
+              Text(text = item.name)
+          }
+      }
+
+  - match: "Composable function"
+    action: "Use PascalCase and end with 'Screen' for screen-level Composables."
+    enforce: true
+    check: |
+      fun \\w+\\(.*\\):.* {
+    suggestion: |
+      Rename to follow PascalCase and end with 'Screen', e.g., `LoginScreen`
+
+  - match: "Theme"
+    action: "Always wrap app content in the custom theme."
+    insert: |
+      MyAppTheme {
+          Surface(
+              modifier = Modifier.fillMaxSize(),
+              color = MaterialTheme.colorScheme.background
+          ) {
+              // App content
+          }
+      }
+
+  - match: "Navigation"
+    action: "Use Compose Destinations or NavHostController for screen routing."
+    insert: |
+      NavHost(navController, startDestination = "home") {
+          composable("home") { HomeScreen(navController) }
+          composable("settings") { SettingsScreen(navController) }
+      }
+
+  - match: "Dialog"
+    action: "Use AlertDialog and control with state."
+    insert: |
+      if (showDialog) {
+          AlertDialog(
+              onDismissRequest = { showDialog = false },
+              title = { Text("Title") },
+              text = { Text("Message") },
+              confirmButton = {
+                  TextButton(onClick = { showDialog = false }) {
+                      Text("OK")
+                  }
+              }
+          )
+      }
+
+  - match: "State"
+    action: "Use `remember`, `rememberSaveable`, or `collectAsStateWithLifecycle` appropriately."
+    enforce: false
+
+  - match: "Modifier"
+    action: "Chain modifiers in order: layout > background > clickable > padding > alignment."
+    enforce: false
+
+  # =================== QR CODE SDK SPECIFIC RULES ===================
+
+  - match: "QR Code Input"
+    action: "Always sanitize and validate QR code input. Enforce max length (4296 chars), remove control characters, and check for script injection."
+    insert: |
+      fun sanitizeQrInput(input: String): String {
+          require(input.length <= 4296) { "QR code data too long" }
+          require(!input.contains(Regex("[\u0000-\u001F]"))) { "Control characters not allowed" }
+          require(!input.contains(Regex("<script|javascript:"))) { "Potential script injection detected" }
+          return input
+      }
+
+  - match: "QR Scanner"
+    action: "Use CameraX for camera integration. Provide real-time preview, torch control, and handle permissions gracefully. Show overlay for scan area guidance. Always annotate with @ExperimentalGetImage."
+    insert: |
+      @androidx.camera.core.ExperimentalGetImage
+      private fun processImageProxy(imageProxy: ImageProxy, onResult: (String) -> Unit) {
+          val mediaImage = imageProxy.image
+          if (mediaImage != null) {
+              val image = InputImage.fromMediaImage(mediaImage, imageProxy.imageInfo.rotationDegrees)
+              // ... process with ML Kit
+          }
+          imageProxy.close()
+      }
+
+  - match: "QR Code Branding"
+    action: "Support custom finder pattern colors, logo integration, and professional styling. Use pre-configured color schemes for banks/industries. Maintain 4.5:1 contrast ratio."
+    insert: |
+      val style = QRCodeStyle(
+          size = 400,
+          margin = 20,
+          quietZone = 8,
+          cornerRadius = 12,
+          borderWidth = 2,
+          borderColor = Color.Red // Brand color
+      )
+      // Use .equityBank, .kcbBank, etc. for color schemes
+
+  - match: "QRCode Generation"
+    action: "Support both Kenya (CBK) and Tanzania (TANQR) standards. Generate P2P and P2M QRs. Allow multi-PSP (multiple account templates). Ensure correct tag structure for each country."
+    insert: |
+      // Example: Kenya P2M (CBK)
+      val template = AccountTemplate(tag = "29", guid = "ke.go.qr", participantId = "2226665", pspInfo = PSPInfo(...))
+      val request = QRCodeGenerationRequest(qrType = QRType.P2M, accountTemplates = listOf(template), ...)
+      // Example: Tanzania (TANQR)
+      val template = AccountTemplate(tag = "26", guid = "tz.go.bot.tips", participantId = "01032", ...)
+
+  - match: "QRCode Parsing"
+    action: "Parser must auto-detect country, QR type, and support deep TLV for tags 26–51. Support both P2P-KE-* and P2M-KE-* format versions. Parse all additional data fields (tag 62), including merchant/healthcare/transport. Handle malformed additional data gracefully."
+    insert: |
+      // Updated regex to support both P2P and P2M
+      val formatRegex = Regex("^(P2P|P2M)-KE-\\d+")
+      
+      // Graceful additional data parsing
+      try {
+          val additionalData = parseAdditionalData(tag62Value)
+      } catch (e: Exception) {
+          Log.w("QRParser", "Malformed additional data, using fallback", e)
+          // Use raw value as fallback
+      }
+
+  - match: "Legacy CBK Format"
+    action: "Support legacy CBK format parsing. Extract GUID and participant ID from flat format 'ke.go.qr<participantId>' without nested TLV structure."
+    insert: |
+      // Legacy format: "0008ke.go.qr68072226665"
+      if (value.startsWith("0008ke.go.qr")) {
+          val guid = "ke.go.qr"
+          val participantId = value.substring(12) // After "0008ke.go.qr"
+          return AccountTemplate(tag, guid, participantId, pspInfo)
+      }
+
+  - match: "P2M Support"
+    action: "Ensure full support for Person-to-Merchant (P2M) QR codes. Validate format versions P2M-KE-01, P2M-KE-02, etc. Handle merchant-specific fields and additional data."
+    enforce: true
+    insert: |
+      // Support both P2P and P2M format versions
+      when {
+          formatVersion.matches(Regex("^P2P-KE-\\d+")) -> QRType.P2P
+          formatVersion.matches(Regex("^P2M-KE-\\d+")) -> QRType.P2M
+          else -> throw TLVParsingException.UnsupportedQRVersion("Unsupported format: $formatVersion")
+      }
+
+  # =================== ERROR HANDLING & VALIDATION ===================
+
+  - match: "Error Handling"
+    action: "Show user-friendly error messages for scan/parse failures. Provide recovery suggestions. Log errors for analytics. Handle all TLVParsingException types."
+    insert: |
+      when (error) {
+          is TLVParsingException.InvalidChecksum -> showError("Invalid QR Code – corrupted or altered.")
+          is TLVParsingException.UnknownPSP -> showError("PSP not supported.")
+          is TLVParsingException.UnsupportedQRVersion -> showError("QR format not supported.")
+          is TLVParsingException.InvalidValue -> showError("Malformed QR data.")
+          else -> showError("Unable to process QR code. Please try again.")
+      }
+
+  - match: "CRC16 Validation"
+    action: "Always validate CRC16 (CBK-compliant) for all QRs. Tag 63 must be last. Use proper CRC16-CCITT algorithm."
+    enforce: true
+    insert: |
+      fun calculateCRC16(data: String): String {
+          // CRC16-CCITT implementation
+          var crc = 0xFFFF
+          for (byte in data.toByteArray()) {
+              crc = crc xor (byte.toInt() shl 8)
+              for (i in 0..7) {
+                  if ((crc and 0x8000) != 0) {
+                      crc = (crc shl 1) xor 0x1021
+                  } else {
+                      crc = crc shl 1
+                  }
+              }
+          }
+          return String.format("%04X", crc and 0xFFFF)
+      }
+
+  - match: "TLV Parsing"
+    action: "Implement robust TLV parsing with proper error handling. Validate tag format, length consistency, and data integrity. Handle truncated or malformed data gracefully."
+    insert: |
+      fun parseTLV(data: String): List<TLVField> {
+          val fields = mutableListOf<TLVField>()
+          var index = 0
+          
+          while (index < data.length - 3) {
+              try {
+                  val tag = data.substring(index, index + 2)
+                  val length = data.substring(index + 2, index + 4).toInt()
+                  
+                  if (index + 4 + length > data.length) {
+                      throw TLVParsingException.InvalidDataLength("Insufficient data for field $tag")
+                  }
+                  
+                  val value = data.substring(index + 4, index + 4 + length)
+                  fields.add(TLVField(tag, length, value))
+                  index += 4 + length
+              } catch (e: NumberFormatException) {
+                  throw TLVParsingException.InvalidLength("Invalid length format at position $index")
+              }
+          }
+          return fields
+      }
+
+  # =================== PERFORMANCE & COMPLIANCE ===================
+
+  - match: "Performance"
+    action: "QR generation <500ms, parsing <100ms, memory <10MB, scan success >95%. Use async processing for heavy operations."
+    insert: |
+      // Use coroutine for async QR parsing
+      viewModelScope.launch {
+          val result = withContext(Dispatchers.Default) { 
+              measureTimeMillis {
+                  parseQrCode(data)
+              }.also { time ->
+                  if (time > 100) Log.w("QRParser", "Slow parsing: ${time}ms")
+              }
+          }
+      }
+
+  - match: "EMVCo Compliance"
+    action: "Ensure TLV structure, tag ordering, CRC calculation, and required fields are validated for all generated/scanned QRs. Support EMVCo v1.1 specification."
+    enforce: true
+    insert: |
+      // Validate TLV structure and tag order
+      require(fields.last().tag == "63") { "CRC must be last tag" }
+      require(fields.first().tag == "00") { "Payload format must be first tag" }
+      
+      // Validate required fields
+      val requiredTags = setOf("00", "01", "52", "53", "58", "63")
+      val presentTags = fields.map { it.tag }.toSet()
+      require(requiredTags.all { it in presentTags }) { "Missing required EMVCo fields" }
+
+  - match: "Version Compliance"
+    action: "Ensure compliance with CBK 2023, TANQR 2022, EMVCo v1.1. Support Android 7+ (API 24+). Log version info for debugging."
+    insert: |
+      // Check SDK version and compliance in logs
+      Log.d("QRCodeSDK", "SDK Version: 2.0.0, CBK 2023, TANQR 2022, EMVCo v1.1")
+      Log.d("QRCodeSDK", "Android API: ${Build.VERSION.SDK_INT}, Min supported: 24")
+
+  # =================== ARCHITECTURE & DESIGN ===================
+
+  - match: "Design System"
+    action: "All UI must use a central design system. Reference a single source of truth for colors, typography, shapes, and spacing. Use Material 3 with dark theme support."
+    insert: |
+      // iOS-style dark theme for QR apps
+      val DarkColorScheme = darkColorScheme(
+          primary = Color(0xFF007AFF),      // iOS blue
+          background = Color(0xFF000000),   // True black
+          surface = Color(0xFF1C1C1E),      // Dark gray cards
+          onBackground = Color(0xFFFFFFFF), // White text
+          onSurface = Color(0xFFFFFFFF)
+      )
+
+  - match: "Modularization"
+    action: "When the app grows, split features into modules (e.g., :feature:qrscanner, :feature:home, :core, :design). Use dependency injection for shared logic. Each module should have its own package and minimal dependencies."
+    insert: |
+      // Example Gradle setup
+      include(":feature:qrscanner", ":feature:home", ":core", ":design")
+      // In build.gradle.kts
+      dependencies {
+          implementation(project(":core"))
+          implementation(project(":design"))
+      }
+
+  - match: "PSP Directory"
+    action: "Maintain centralized PSP directory with all supported payment service providers. Include CBK standard GUID 'ke.go.qr' and bank-specific configurations."
+    insert: |
+      // PSP Directory entries
+      PSPInfo(
+          type = PSPInfo.PSPType.BANK,
+          identifier = "ke.go.qr",
+          name = "CBK Standard",
+          country = Country.KENYA,
+          guid = "ke.go.qr"
+      )
+
+  # =================== SECURITY & VALIDATION ===================
+
+  - match: "Input Validation"
+    action: "Validate all inputs for length, format, and content. Sanitize data before processing. Prevent injection attacks and handle edge cases."
+    enforce: true
+    insert: |
+      fun validateQRInput(qrData: String): String {
+          require(qrData.isNotBlank()) { "QR data cannot be empty" }
+          require(qrData.length <= 4296) { "QR data exceeds maximum length" }
+          require(!qrData.contains(Regex("[\u0000-\u001F]"))) { "Invalid control characters" }
+          return qrData.trim()
+      }
+
+  - match: "Merchant Category Code (MCC)"
+    action: "Validate MCC for P2P vs P2M classification. Use 4-digit numeric codes. Enforce correct field requirements based on QR type."
+    insert: |
+      fun validateMCC(mcc: String): QRType {
+          require(mcc.matches(Regex("\\d{4}"))) { "MCC must be 4 digits" }
+          return when {
+              MerchantCategories.isP2P(mcc) -> QRType.P2P
+              MerchantCategories.isP2M(mcc) -> QRType.P2M
+              else -> throw TLVParsingException.InvalidValue("Unknown MCC category: $mcc")
+          }
+      }
+
+  # =================== DEBUGGING & LOGGING ===================
+
+  - match: "Logging"
+    action: "Use structured logging with appropriate levels. Log parsing steps, errors, and performance metrics. Include correlation IDs for debugging."
+    insert: |
+      // Structured logging for QR operations
+      Log.d("QRParser", "Parsing QR: ${qrData.take(50)}...")
+      Log.d("QRParser", "Parsed ${fields.size} TLV fields")
+      Log.d("QRParser", "QR Type: $qrType, Country: $country, PSP: $pspName")
+      
+      // Error logging with context
+      Log.e("QRParser", "Parse error: ${error.message}", error)
+
+  - match: "Deprecation Handling"
+    action: "Replace deprecated APIs immediately. Use modern alternatives and add migration notes."
+    insert: |
+      // Replace deprecated APIs
+      // OLD: char.toUpperCase()
+      // NEW: char.uppercaseChar()
+      val upperChar = char.uppercaseChar()
+      
+      // OLD: BigDecimal.ROUND_HALF_UP
+      // NEW: RoundingMode.HALF_UP
+      amount.setScale(2, RoundingMode.HALF_UP)
+
