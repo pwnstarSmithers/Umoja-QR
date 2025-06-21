@@ -1,0 +1,15 @@
+/Users/smithers/Documents/Dev/QRCodeSDK/Sources/QRCodeSDK/Advanced/AdvancedFeatures.swift
+/Users/smithers/Documents/Dev/QRCodeSDK/Sources/QRCodeSDK/Debug/DebugTools.swift
+/Users/smithers/Documents/Dev/QRCodeSDK/Sources/QRCodeSDK/Generator/EnhancedQRGenerator.swift
+/Users/smithers/Documents/Dev/QRCodeSDK/Sources/QRCodeSDK/Generator/KenyaP2PQRGenerator.swift
+/Users/smithers/Documents/Dev/QRCodeSDK/Sources/QRCodeSDK/Generator/QRBrandingEngine.swift
+/Users/smithers/Documents/Dev/QRCodeSDK/Sources/QRCodeSDK/Models/MerchantCategories.swift
+/Users/smithers/Documents/Dev/QRCodeSDK/Sources/QRCodeSDK/Models/PSPDirectory.swift
+/Users/smithers/Documents/Dev/QRCodeSDK/Sources/QRCodeSDK/Models/QRCodeModels.swift
+/Users/smithers/Documents/Dev/QRCodeSDK/Sources/QRCodeSDK/Parser/EnhancedQRParser.swift
+/Users/smithers/Documents/Dev/QRCodeSDK/Sources/QRCodeSDK/Parser/KenyaP2PQRParser.swift
+/Users/smithers/Documents/Dev/QRCodeSDK/Sources/QRCodeSDK/Parser/TLVParsingError.swift
+/Users/smithers/Documents/Dev/QRCodeSDK/Sources/QRCodeSDK/Production/ProductionManager.swift
+/Users/smithers/Documents/Dev/QRCodeSDK/Sources/QRCodeSDK/QRCodeSDK.swift
+/Users/smithers/Documents/Dev/QRCodeSDK/Sources/QRCodeSDK/Security/SecurityManager.swift
+/Users/smithers/Documents/Dev/QRCodeSDK/Sources/QRCodeSDK/Utils/PerformanceOptimizer.swift

@@ -1,0 +1,4 @@
+module QRCodeSDKPackageTests {
+    header "/Users/smithers/Documents/Dev/QRCodeSDK/.build/x86_64-apple-macosx/debug/QRCodeSDKPackageTests.build/QRCodeSDKPackageTests-Swift.h"
+    requires objc
+}

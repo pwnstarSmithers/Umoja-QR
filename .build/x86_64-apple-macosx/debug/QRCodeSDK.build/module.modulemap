@@ -1,0 +1,4 @@
+module QRCodeSDK {
+    header "/Users/smithers/Documents/Dev/QRCodeSDK/.build/x86_64-apple-macosx/debug/QRCodeSDK.build/QRCodeSDK-Swift.h"
+    requires objc
+}

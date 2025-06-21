@@ -1,0 +1,53 @@
+{
+  "": {
+    "swift-dependencies": "/Users/smithers/Documents/Dev/QRCodeSDK/.build/x86_64-apple-macosx/debug/QRCodeSDKTests.build/master.swiftdeps"
+  },
+  "/Users/smithers/Documents/Dev/QRCodeSDK/Tests/AdvancedBrandingTests.swift": {
+    "dependencies": "/Users/smithers/Documents/Dev/QRCodeSDK/.build/x86_64-apple-macosx/debug/QRCodeSDKTests.build/AdvancedBrandingTests.d",
+    "object": "/Users/smithers/Documents/Dev/QRCodeSDK/.build/x86_64-apple-macosx/debug/QRCodeSDKTests.build/AdvancedBrandingTests.swift.o",
+    "swiftmodule": "/Users/smithers/Documents/Dev/QRCodeSDK/.build/x86_64-apple-macosx/debug/QRCodeSDKTests.build/AdvancedBrandingTests~partial.swiftmodule",
+    "swift-dependencies": "/Users/smithers/Documents/Dev/QRCodeSDK/.build/x86_64-apple-macosx/debug/QRCodeSDKTests.build/AdvancedBrandingTests.swiftdeps"
+  },
+  "/Users/smithers/Documents/Dev/QRCodeSDK/Tests/CBKComplianceTests.swift": {
+    "dependencies": "/Users/smithers/Documents/Dev/QRCodeSDK/.build/x86_64-apple-macosx/debug/QRCodeSDKTests.build/CBKComplianceTests.d",
+    "object": "/Users/smithers/Documents/Dev/QRCodeSDK/.build/x86_64-apple-macosx/debug/QRCodeSDKTests.build/CBKComplianceTests.swift.o",
+    "swiftmodule": "/Users/smithers/Documents/Dev/QRCodeSDK/.build/x86_64-apple-macosx/debug/QRCodeSDKTests.build/CBKComplianceTests~partial.swiftmodule",
+    "swift-dependencies": "/Users/smithers/Documents/Dev/QRCodeSDK/.build/x86_64-apple-macosx/debug/QRCodeSDKTests.build/CBKComplianceTests.swiftdeps"
+  },
+  "/Users/smithers/Documents/Dev/QRCodeSDK/Tests/IntegrationTests.swift": {
+    "dependencies": "/Users/smithers/Documents/Dev/QRCodeSDK/.build/x86_64-apple-macosx/debug/QRCodeSDKTests.build/IntegrationTests.d",
+    "object": "/Users/smithers/Documents/Dev/QRCodeSDK/.build/x86_64-apple-macosx/debug/QRCodeSDKTests.build/IntegrationTests.swift.o",
+    "swiftmodule": "/Users/smithers/Documents/Dev/QRCodeSDK/.build/x86_64-apple-macosx/debug/QRCodeSDKTests.build/IntegrationTests~partial.swiftmodule",
+    "swift-dependencies": "/Users/smithers/Documents/Dev/QRCodeSDK/.build/x86_64-apple-macosx/debug/QRCodeSDKTests.build/IntegrationTests.swiftdeps"
+  },
+  "/Users/smithers/Documents/Dev/QRCodeSDK/Tests/KenyaP2MGenerationTests.swift": {
+    "dependencies": "/Users/smithers/Documents/Dev/QRCodeSDK/.build/x86_64-apple-macosx/debug/QRCodeSDKTests.build/KenyaP2MGenerationTests.d",
+    "object": "/Users/smithers/Documents/Dev/QRCodeSDK/.build/x86_64-apple-macosx/debug/QRCodeSDKTests.build/KenyaP2MGenerationTests.swift.o",
+    "swiftmodule": "/Users/smithers/Documents/Dev/QRCodeSDK/.build/x86_64-apple-macosx/debug/QRCodeSDKTests.build/KenyaP2MGenerationTests~partial.swiftmodule",
+    "swift-dependencies": "/Users/smithers/Documents/Dev/QRCodeSDK/.build/x86_64-apple-macosx/debug/QRCodeSDKTests.build/KenyaP2MGenerationTests.swiftdeps"
+  },
+  "/Users/smithers/Documents/Dev/QRCodeSDK/Tests/KenyaP2PGenerationTests.swift": {
+    "dependencies": "/Users/smithers/Documents/Dev/QRCodeSDK/.build/x86_64-apple-macosx/debug/QRCodeSDKTests.build/KenyaP2PGenerationTests.d",
+    "object": "/Users/smithers/Documents/Dev/QRCodeSDK/.build/x86_64-apple-macosx/debug/QRCodeSDKTests.build/KenyaP2PGenerationTests.swift.o",
+    "swiftmodule": "/Users/smithers/Documents/Dev/QRCodeSDK/.build/x86_64-apple-macosx/debug/QRCodeSDKTests.build/KenyaP2PGenerationTests~partial.swiftmodule",
+    "swift-dependencies": "/Users/smithers/Documents/Dev/QRCodeSDK/.build/x86_64-apple-macosx/debug/QRCodeSDKTests.build/KenyaP2PGenerationTests.swiftdeps"
+  },
+  "/Users/smithers/Documents/Dev/QRCodeSDK/Tests/KenyaP2PParsingTests.swift": {
+    "dependencies": "/Users/smithers/Documents/Dev/QRCodeSDK/.build/x86_64-apple-macosx/debug/QRCodeSDKTests.build/KenyaP2PParsingTests.d",
+    "object": "/Users/smithers/Documents/Dev/QRCodeSDK/.build/x86_64-apple-macosx/debug/QRCodeSDKTests.build/KenyaP2PParsingTests.swift.o",
+    "swiftmodule": "/Users/smithers/Documents/Dev/QRCodeSDK/.build/x86_64-apple-macosx/debug/QRCodeSDKTests.build/KenyaP2PParsingTests~partial.swiftmodule",
+    "swift-dependencies": "/Users/smithers/Documents/Dev/QRCodeSDK/.build/x86_64-apple-macosx/debug/QRCodeSDKTests.build/KenyaP2PParsingTests.swiftdeps"
+  },
+  "/Users/smithers/Documents/Dev/QRCodeSDK/Tests/ProductionReadinessTests.swift": {
+    "dependencies": "/Users/smithers/Documents/Dev/QRCodeSDK/.build/x86_64-apple-macosx/debug/QRCodeSDKTests.build/ProductionReadinessTests.d",
+    "object": "/Users/smithers/Documents/Dev/QRCodeSDK/.build/x86_64-apple-macosx/debug/QRCodeSDKTests.build/ProductionReadinessTests.swift.o",
+    "swiftmodule": "/Users/smithers/Documents/Dev/QRCodeSDK/.build/x86_64-apple-macosx/debug/QRCodeSDKTests.build/ProductionReadinessTests~partial.swiftmodule",
+    "swift-dependencies": "/Users/smithers/Documents/Dev/QRCodeSDK/.build/x86_64-apple-macosx/debug/QRCodeSDKTests.build/ProductionReadinessTests.swiftdeps"
+  },
+  "/Users/smithers/Documents/Dev/QRCodeSDK/Tests/SecurityEdgeCaseTests.swift": {
+    "dependencies": "/Users/smithers/Documents/Dev/QRCodeSDK/.build/x86_64-apple-macosx/debug/QRCodeSDKTests.build/SecurityEdgeCaseTests.d",
+    "object": "/Users/smithers/Documents/Dev/QRCodeSDK/.build/x86_64-apple-macosx/debug/QRCodeSDKTests.build/SecurityEdgeCaseTests.swift.o",
+    "swiftmodule": "/Users/smithers/Documents/Dev/QRCodeSDK/.build/x86_64-apple-macosx/debug/QRCodeSDKTests.build/SecurityEdgeCaseTests~partial.swiftmodule",
+    "swift-dependencies": "/Users/smithers/Documents/Dev/QRCodeSDK/.build/x86_64-apple-macosx/debug/QRCodeSDKTests.build/SecurityEdgeCaseTests.swiftdeps"
+  }
+}

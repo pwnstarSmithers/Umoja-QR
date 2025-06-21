@@ -1,0 +1,11 @@
+{
+  "": {
+    "swift-dependencies": "/Users/smithers/Documents/Dev/QRCodeSDK/.build/x86_64-apple-macosx/debug/QRCodeSDKPackageTests.build/master.swiftdeps"
+  },
+  "/Users/smithers/Documents/Dev/QRCodeSDK/.build/x86_64-apple-macosx/debug/QRCodeSDKPackageTests.derived/runner.swift": {
+    "dependencies": "/Users/smithers/Documents/Dev/QRCodeSDK/.build/x86_64-apple-macosx/debug/QRCodeSDKPackageTests.build/runner.d",
+    "object": "/Users/smithers/Documents/Dev/QRCodeSDK/.build/x86_64-apple-macosx/debug/QRCodeSDKPackageTests.build/runner.swift.o",
+    "swiftmodule": "/Users/smithers/Documents/Dev/QRCodeSDK/.build/x86_64-apple-macosx/debug/QRCodeSDKPackageTests.build/runner~partial.swiftmodule",
+    "swift-dependencies": "/Users/smithers/Documents/Dev/QRCodeSDK/.build/x86_64-apple-macosx/debug/QRCodeSDKPackageTests.build/runner.swiftdeps"
+  }
+}
