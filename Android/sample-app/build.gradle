@@ -1,0 +1,104 @@
+// Top-level build file where you can add configuration options common to all sub-projects/modules.
+plugins {
+    id 'com.android.application' version '8.2.2' apply false
+    id 'com.android.library' version '8.2.2' apply false
+    id 'org.jetbrains.kotlin.android' version '1.9.22' apply false
+    id 'org.jetbrains.kotlin.kapt' version '1.9.22' apply false
+    id 'com.google.dagger.hilt.android' version '2.48' apply false
+}
+
+// JaCoCo Configuration for all projects
+allprojects {
+    apply plugin: 'jacoco'
+    
+    jacoco {
+        toolVersion = "0.8.11"
+    }
+    
+    tasks.withType(Test) {
+        jacoco.includeNoLocationClasses = true
+        jacoco.excludes = ['jdk.internal.*']
+    }
+}
+
+// Project-wide JaCoCo report task
+task jacocoRootReport(type: JacocoReport, group: 'Coverage reports') {
+    description = 'Generates an aggregate report from all subprojects'
+
+    // Only depend on subprojects that have the jacocoTestReport task
+    def reportTasks = subprojects.collect { it.tasks.findByName('jacocoTestReport') }.findAll { it != null }
+    dependsOn(reportTasks)
+
+    // Aggregate source, class, and execution data from subprojects with jacocoTestReport
+    additionalSourceDirs.from = files(subprojects.findAll { it.tasks.findByName('jacocoTestReport') != null }.collect { it.sourceSets.main.allSource.srcDirs })
+    sourceDirectories.from = files(subprojects.findAll { it.tasks.findByName('jacocoTestReport') != null }.collect { it.sourceSets.main.allSource.srcDirs })
+    classDirectories.from = files(subprojects.findAll { it.tasks.findByName('jacocoTestReport') != null }.collect { it.tasks.jacocoTestReport.classDirectories })
+    executionData.from = files(subprojects.findAll { it.tasks.findByName('jacocoTestReport') != null }.collect { it.tasks.jacocoTestReport.executionData })
+
+    reports {
+        html.required = true
+        xml.required = true
+        csv.required = false
+    }
+
+    doLast {
+        println "Aggregate JaCoCo report generated at: ${reports.html.outputLocation}"
+    }
+}
+
+// Project-wide coverage verification
+task jacocoRootCoverageVerification(type: JacocoCoverageVerification, group: 'Coverage reports') {
+    description = 'Verifies coverage thresholds for all subprojects'
+
+    dependsOn(jacocoRootReport)
+
+    violationRules {
+        rule {
+            limit {
+                counter = 'LINE'
+                value = 'COVEREDRATIO'
+                minimum = 0.75 // 75% overall line coverage
+            }
+        }
+        rule {
+            limit {
+                counter = 'BRANCH'
+                value = 'COVEREDRATIO'
+                minimum = 0.65 // 65% overall branch coverage
+            }
+        }
+        rule {
+            limit {
+                counter = 'METHOD'
+                value = 'COVEREDRATIO'
+                minimum = 0.80 // 80% overall method coverage
+            }
+        }
+        rule {
+            limit {
+                counter = 'CLASS'
+                value = 'COVEREDRATIO'
+                minimum = 0.85 // 85% overall class coverage
+            }
+        }
+    }
+
+    // Aggregate source, class, and execution data from subprojects with jacocoTestReport
+    additionalSourceDirs.from = files(subprojects.findAll { it.tasks.findByName('jacocoTestReport') != null }.collect { it.sourceSets.main.allSource.srcDirs })
+    sourceDirectories.from = files(subprojects.findAll { it.tasks.findByName('jacocoTestReport') != null }.collect { it.sourceSets.main.allSource.srcDirs })
+    classDirectories.from = files(subprojects.findAll { it.tasks.findByName('jacocoTestReport') != null }.collect { it.tasks.jacocoTestReport.classDirectories })
+    executionData.from = files(subprojects.findAll { it.tasks.findByName('jacocoTestReport') != null }.collect { it.tasks.jacocoTestReport.executionData })
+}
+
+// Convenience task to run all tests and generate coverage reports
+task testWithCoverage(group: 'verification') {
+    description = 'Runs all tests and generates coverage reports'
+    dependsOn subprojects.collect { it.tasks.matching { t -> t.name == 'test' } }
+    dependsOn 'jacocoRootReport'
+}
+
+// Task to check coverage thresholds
+task checkCoverage(group: 'verification') {
+    description = 'Runs tests and verifies coverage thresholds'
+    dependsOn 'testWithCoverage', 'jacocoRootCoverageVerification'
+} 
