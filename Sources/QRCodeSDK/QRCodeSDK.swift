@@ -166,6 +166,69 @@ public final class QRCodeSDK {
     
     /// Supported QR types
     public static let supportedQRTypes: [QRType] = [.p2p, .p2m]
+    
+    /// Debug a QR code to identify parsing issues
+    /// - Parameter qrString: The QR code string to debug
+    /// - Returns: Debug analysis of the QR structure
+    public func debugQRCode(_ qrString: String) -> String {
+        return DebugTools.debugTLVStructure(qrString)
+    }
+    
+    /// Attempt to parse a QR code with enhanced error reporting
+    /// - Parameter qrString: The QR code string to parse
+    /// - Returns: Either a successfully parsed QR code or detailed error information
+    public func parseQRWithDiagnostics(_ qrString: String) -> QRParseResult {
+        do {
+            let parsed = try parser.parseQR(qrString)
+            return .success(parsed)
+        } catch let error as ValidationError {
+            let diagnostics = generateDiagnostics(for: qrString, error: error)
+            return .failure(error, diagnostics)
+        } catch {
+            let diagnostics = "Unexpected error: \(error.localizedDescription)"
+            return .failure(ValidationError.malformedData, diagnostics)
+        }
+    }
+    
+    /// Generate detailed diagnostics for parsing failures
+    private func generateDiagnostics(for qrString: String, error: ValidationError) -> String {
+        var diagnostics = "🔍 QR Code Diagnostics\n"
+        diagnostics += "======================\n\n"
+        
+        diagnostics += "❌ Parsing Error: \(error.localizedDescription)\n"
+        diagnostics += "💡 Recovery Suggestion: \(error.recoverySuggestion)\n\n"
+        
+        diagnostics += "📊 TLV Structure Analysis:\n"
+        diagnostics += DebugTools.debugTLVStructure(qrString)
+        
+        // Add specific suggestions based on error type
+        switch error {
+        case .invalidFieldLength(let tag, let actual, let expected):
+            diagnostics += "\n🔧 Specific Issue Analysis:\n"
+            diagnostics += "Tag \(tag) has incorrect length:\n"
+            diagnostics += "- Found: \(actual) characters\n"
+            if let expected = expected {
+                diagnostics += "- Expected: \(expected) characters\n"
+            }
+            diagnostics += "- This usually indicates malformed QR data\n"
+            
+        case .malformedData:
+            diagnostics += "\n🔧 Possible Causes:\n"
+            diagnostics += "- QR code was truncated or corrupted\n"
+            diagnostics += "- Invalid TLV structure (Tag-Length-Value format)\n"
+            diagnostics += "- Missing or extra characters\n"
+            
+        case .invalidChecksum:
+            diagnostics += "\n🔧 Checksum Issue:\n"
+            diagnostics += "- CRC16 validation failed\n"
+            diagnostics += "- QR code may have been modified or corrupted\n"
+            
+        default:
+            break
+        }
+        
+        return diagnostics
+    }
 }
 
 // MARK: - Quick Access Extensions

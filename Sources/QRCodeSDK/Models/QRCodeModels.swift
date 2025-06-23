@@ -816,4 +816,34 @@ public struct QRCodeStyle {
     )
 }
 
+/// Result of QR parsing with diagnostics
+public enum QRParseResult {
+    case success(ParsedQRCode)
+    case failure(ValidationError, String) // error and diagnostics
+    
+    /// Check if parsing was successful
+    public var isSuccess: Bool {
+        switch self {
+        case .success: return true
+        case .failure: return false
+        }
+    }
+    
+    /// Get the parsed QR code if successful
+    public var parsedQR: ParsedQRCode? {
+        switch self {
+        case .success(let qr): return qr
+        case .failure: return nil
+        }
+    }
+    
+    /// Get error information if parsing failed
+    public var error: (ValidationError, String)? {
+        switch self {
+        case .success: return nil
+        case .failure(let error, let diagnostics): return (error, diagnostics)
+        }
+    }
+}
+
  

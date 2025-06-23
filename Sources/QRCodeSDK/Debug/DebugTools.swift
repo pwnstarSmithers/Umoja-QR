@@ -351,6 +351,136 @@ public class DebugTools {
             supportedStandards: ["Kenya P2P QR Code Standard v0.3"]
         )
     }
+    
+    /// Manually parse QR code TLV structure for debugging
+    /// - Parameter qrData: The QR code data string
+    /// - Returns: Debug information about the TLV structure
+    public static func debugTLVStructure(_ qrData: String) -> String {
+        var result = "🔍 TLV Structure Analysis\n"
+        result += "========================\n"
+        result += "QR Data: \(qrData)\n"
+        result += "Length: \(qrData.count) characters\n\n"
+        
+        var cursor = qrData.startIndex
+        var fieldIndex = 0
+        
+        while cursor < qrData.endIndex {
+            fieldIndex += 1
+            result += "Field \(fieldIndex):\n"
+            
+            // Check if we have enough characters for tag
+            guard qrData.distance(from: cursor, to: qrData.endIndex) >= 2 else {
+                result += "❌ ERROR: Not enough data for tag (need 2 chars, have \(qrData.distance(from: cursor, to: qrData.endIndex)))\n"
+                break
+            }
+            
+            // Parse tag
+            let tag = String(qrData[cursor..<qrData.index(cursor, offsetBy: 2)])
+            cursor = qrData.index(cursor, offsetBy: 2)
+            result += "  Tag: \(tag)\n"
+            
+            // Check if we have enough characters for length
+            guard qrData.distance(from: cursor, to: qrData.endIndex) >= 2 else {
+                result += "❌ ERROR: Not enough data for length (need 2 chars, have \(qrData.distance(from: cursor, to: qrData.endIndex)))\n"
+                break
+            }
+            
+            // Parse length
+            let lengthStr = String(qrData[cursor..<qrData.index(cursor, offsetBy: 2)])
+            cursor = qrData.index(cursor, offsetBy: 2)
+            
+            guard let length = Int(lengthStr) else {
+                result += "❌ ERROR: Invalid length value: \(lengthStr)\n"
+                break
+            }
+            
+            result += "  Length: \(length) (from string '\(lengthStr)')\n"
+            
+            // Check if we have enough characters for value
+            let remainingChars = qrData.distance(from: cursor, to: qrData.endIndex)
+            if remainingChars < length {
+                result += "❌ ERROR: Not enough data for value (need \(length) chars, have \(remainingChars))\n"
+                result += "  Remaining data: '\(String(qrData[cursor...]))'\n"
+                break
+            }
+            
+            // Parse value
+            let value = String(qrData[cursor..<qrData.index(cursor, offsetBy: length)])
+            cursor = qrData.index(cursor, offsetBy: length)
+            result += "  Value: '\(value)' (actual length: \(value.count))\n"
+            
+            // Check for common issues
+            if value.count != length {
+                result += "⚠️  WARNING: Value length mismatch! Expected \(length), got \(value.count)\n"
+            }
+            
+            // Show nested structure for known template tags
+            if ["26", "27", "28", "29", "62"].contains(tag) && !value.isEmpty {
+                result += "  🔍 Nested TLV structure:\n"
+                result += debugNestedTLV(value, indent: "    ")
+            }
+            
+            result += "\n"
+        }
+        
+        result += "✅ Analysis complete. Parsed \(fieldIndex) fields.\n"
+        return result
+    }
+    
+    /// Debug nested TLV structure
+    private static func debugNestedTLV(_ data: String, indent: String) -> String {
+        var result = ""
+        var cursor = data.startIndex
+        var nestedIndex = 0
+        
+        while cursor < data.endIndex {
+            nestedIndex += 1
+            
+            // Check if we have enough characters for tag
+            guard data.distance(from: cursor, to: data.endIndex) >= 2 else {
+                result += "\(indent)❌ ERROR: Not enough data for nested tag\n"
+                break
+            }
+            
+            // Parse tag
+            let tag = String(data[cursor..<data.index(cursor, offsetBy: 2)])
+            cursor = data.index(cursor, offsetBy: 2)
+            
+            // Check if we have enough characters for length
+            guard data.distance(from: cursor, to: data.endIndex) >= 2 else {
+                result += "\(indent)❌ ERROR: Not enough data for nested length\n"
+                break
+            }
+            
+            // Parse length
+            let lengthStr = String(data[cursor..<data.index(cursor, offsetBy: 2)])
+            cursor = data.index(cursor, offsetBy: 2)
+            
+            guard let length = Int(lengthStr) else {
+                result += "\(indent)❌ ERROR: Invalid nested length: \(lengthStr)\n"
+                break
+            }
+            
+            // Check if we have enough characters for value
+            let remainingChars = data.distance(from: cursor, to: data.endIndex)
+            if remainingChars < length {
+                result += "\(indent)❌ ERROR: Not enough data for nested value (need \(length), have \(remainingChars))\n"
+                break
+            }
+            
+            // Parse value
+            let value = String(data[cursor..<data.index(cursor, offsetBy: length)])
+            cursor = data.index(cursor, offsetBy: length)
+            
+            result += "\(indent)[\(nestedIndex)] Tag: \(tag), Length: \(length), Value: '\(value)'\n"
+            
+            if value.count != length {
+                result += "\(indent)⚠️  WARNING: Nested value length mismatch!\n"
+            }
+        }
+        
+        return result
+    }
 }
 
 // MARK: - Supporting Types

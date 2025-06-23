@@ -160,7 +160,7 @@ public class EnhancedQRParser {
     
     private func parseNestedTemplate(tag: String, value: String) throws -> [TLVField]? {
         // Check if this tag represents a template that contains nested TLV data
-        if accountTemplateTags.contains(tag) || tag == "62" {
+        if accountTemplateTags.contains(tag) || tag == "62" || tag == "82" {
             // Parse nested TLV structure
             return try parseTLVWithTemplates(value, isNested: true)
         }
@@ -332,6 +332,11 @@ public class EnhancedQRParser {
             }
         }
         
+        // CBK Kenya specific extension tags (80-99)
+        if let tagNumber = Int(tag), tagNumber >= 80 && tagNumber <= 99 {
+            return true
+        }
+        
         // Additional validation for specific use cases
         return false
     }
@@ -341,38 +346,56 @@ public class EnhancedQRParser {
         let maxFieldLength = isNested ? 99 : 255
         
         guard length <= maxFieldLength else {
+            print("❌ Field length validation failed for tag \(tag): \(length) > \(maxFieldLength)")
             throw ValidationError.invalidFieldValue("length", String(length))
         }
         
-        // Specific tag constraints (relaxed for better compatibility)
-        switch tag {
-        case "00": // Payload format
-            guard length == 2 else {
-                throw ValidationError.invalidFieldLength(tag, length, expected: 2)
+        // Specific tag constraints - be more lenient for nested templates
+        if !isNested {
+            switch tag {
+            case "00": // Payload format - only validate at top level
+                guard length == 2 else {
+                    print("❌ Tag 00 length validation failed: expected 2, got \(length)")
+                    throw ValidationError.invalidFieldLength(tag, length, expected: 2)
+                }
+            case "01": // Initiation method - only validate at top level
+                guard length == 2 else {
+                    print("❌ Tag 01 length validation failed: expected 2, got \(length)")
+                    throw ValidationError.invalidFieldLength(tag, length, expected: 2)
+                }
+            case "52": // MCC
+                guard length == 4 else {
+                    print("❌ Tag 52 length validation failed: expected 4, got \(length)")
+                    throw ValidationError.invalidFieldLength(tag, length, expected: 4)
+                }
+            case "53": // Currency
+                guard length == 3 else {
+                    print("❌ Tag 53 length validation failed: expected 3, got \(length)")
+                    throw ValidationError.invalidFieldLength(tag, length, expected: 3)
+                }
+            case "58": // Country code
+                guard length == 2 else {
+                    print("❌ Tag 58 length validation failed: expected 2, got \(length)")
+                    throw ValidationError.invalidFieldLength(tag, length, expected: 2)
+                }
+            case "63": // CRC
+                guard length == 4 else {
+                    print("❌ Tag 63 length validation failed: expected 4, got \(length)")
+                    throw ValidationError.invalidFieldLength(tag, length, expected: 4)
+                }
+            default:
+                // For other top-level tags, use general length validation
+                guard length >= 0 && length <= maxFieldLength else {
+                    print("❌ General length validation failed for tag \(tag): \(length) not in range 0-\(maxFieldLength)")
+                    throw ValidationError.invalidFieldLength(tag, length, expected: nil)
+                }
             }
-        case "01": // Initiation method
-            guard length == 2 else {
-                throw ValidationError.invalidFieldLength(tag, length, expected: 2)
-            }
-        case "52": // MCC
-            guard length == 4 else {
-                throw ValidationError.invalidFieldLength(tag, length, expected: 4)
-            }
-        case "53": // Currency
-            guard length == 3 else {
-                throw ValidationError.invalidFieldLength(tag, length, expected: 3)
-            }
-        case "58": // Country code
-            guard length == 2 else {
-                throw ValidationError.invalidFieldLength(tag, length, expected: 2)
-            }
-        case "63": // CRC
-            guard length == 4 else {
-                throw ValidationError.invalidFieldLength(tag, length, expected: 4)
-            }
-        default:
-            // For other tags, use general length validation (more permissive)
+        } else {
+            // For nested templates, be much more permissive
+            // In CBK format, Tag 00 in nested templates can be "ke.go.qr" (8 chars)
+            // Tag 01 in nested templates can be phone numbers (variable length)
             guard length >= 0 && length <= maxFieldLength else {
+                print("❌ Nested field length validation failed for tag \(tag): \(length) not in range 0-\(maxFieldLength)")
                 throw ValidationError.invalidFieldLength(tag, length, expected: nil)
             }
         }
@@ -381,16 +404,19 @@ public class EnhancedQRParser {
     private func validateFieldContent(tag: String, value: String, isNested: Bool) throws {
         // Skip validation for nested templates to be more permissive
         if isNested {
+            // For nested templates, only do basic validation
+            // Tag 00 in nested templates can be "ke.go.qr" or other GUIDs
+            // Tag 01 can be phone numbers, account numbers, etc.
             return
         }
         
-        // Specific content validation (only for critical fields)
+        // Specific content validation (only for critical top-level fields)
         switch tag {
-        case "00": // Payload format
+        case "00": // Payload format - only validate at top level
             guard value == "01" else {
                 throw ValidationError.invalidFieldValue(tag, value)
             }
-        case "01": // Initiation method
+        case "01": // Initiation method - only validate at top level
             guard ["11", "12"].contains(value) else {
                 throw ValidationError.invalidFieldValue(tag, value)
             }
